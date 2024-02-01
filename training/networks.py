@@ -180,8 +180,9 @@ class UNetBlock(torch.nn.Module):
 
         if self.num_heads:
             q, k, v = self.qkv(self.norm2(x)).reshape(x.shape[0] * self.num_heads, x.shape[1] // self.num_heads, 3, -1).unbind(2)
-            w = AttentionOp.apply(q, k)
-            a = torch.einsum('nqk,nck->ncq', w, v)
+            # w = AttentionOp.apply(q, k)
+            # a = torch.einsum('nqk,nck->ncq', w, v)
+            a = torch.nn.functional.scaled_dot_product_attention(q, k, v)
             x = self.proj(a.reshape(*x.shape)).add_(x)
             x = x * self.skip_scale
         return x
